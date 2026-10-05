@@ -1,4 +1,5 @@
 -- NT2 Woordenschat — yeni Supabase projesi için tablolar
+-- (Zaten kurduysan tekrar çalıştırmana gerek yok.)
 -- Supabase → SQL Editor → bu dosyanın tamamını yapıştır → Run
 
 create table if not exists public.cards (
@@ -31,7 +32,6 @@ create table if not exists public.app_state (
   updated_at timestamptz default now()
 );
 
--- Uygulama publishable key ile okur/yazar (kişisel uygulama, giriş yok)
 alter table public.cards     enable row level security;
 alter table public.progress  enable row level security;
 alter table public.app_state enable row level security;

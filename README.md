@@ -1,34 +1,33 @@
-# NT2 Woordenschat
+# NT2 Woordenschat — v2
 
-Docent NT2 opleiding için Hollandaca kavram kartları. Kantoor Woordenschat v38'in yapısı (Hatırla, Sesli tekrar, Dinle, İlerleme, çöp kutusu, hatırlatma, yedek) aynen korunur; içerik, temalar, renk ve ikon NT2'ye göre değişti. Kantoor Woordenschat'a dokunulmaz.
+Docent NT2 opleiding için Hollandaca kavram kartları (Supabase + Vercel). Kantoor Woordenschat'a dokunulmaz.
 
-## Kurulum (bir kez, ~15 dakika)
+## v2 güncellemesi (zaten kurduysan)
 
-1. **Supabase:** supabase.com → New project (ör. `nt2-woordenschat`). Proje açılınca **SQL Editor**'e `supabase-kurulum.sql` dosyasının tamamını yapıştır → **Run**.
-2. **Adres ve anahtar:** Project Settings → API'den *Project URL* ve *publishable key*'i kopyala. `index.html` dosyasının en başındaki iki satıra yapıştır:
-   ```js
-   const SUPABASE_URL = 'https://PROJE-ADRESI.supabase.co';
-   const SUPABASE_KEY = 'sb_publishable_ANAHTAR';
-   ```
-3. **GitHub:** yeni bir depo aç (ör. `nt2-woordenschat`), bu klasördeki bütün dosyaları köke yükle.
-4. **Vercel:** Add New → Project → bu depoyu seç → Deploy. Ayrı bir adres alır (Kantoor'unkinden bağımsız).
-5. Uygulamayı ilk açışta 97 kart veritabanına **kendiliğinden** yüklenir (üstte "İlk kurulum…" yazar). Sonra telefonda "Ana ekrana ekle".
+1. Şu anki `index.html` dosyanın en başındaki **iki satırı** (SUPABASE_URL ve SUPABASE_KEY) bir yere kopyala.
+2. Bu ZIP'teki dosyaları GitHub deposundaki aynı adlı dosyaların üzerine koy.
+3. Yeni `index.html`'in başındaki `PROJE-ADRESI` / `ANAHTAR` satırlarını kopyaladığın iki satırla değiştir. Commit → Vercel yayınlar.
+4. Uygulamayı aç. Mevcut 97 karta kelime yapısı/köken ve 2 yeni örnek cümle **kendiliğinden** eklenir. İlerleme ve tekrar takvimi değişmez, kartlar çoğalmaz.
 
-Adres/anahtar girilmemişse üstte "Supabase ayarlanmadı" yazar.
+SQL'i yeniden çalıştırmana gerek yok.
+
+## İlk kurulum (yeni bir proje için)
+
+1. Supabase → New project → SQL Editor → `supabase-kurulum.sql` → Run.
+2. Project Settings → API'den Project URL ve publishable key'i `index.html`'in başındaki iki satıra yaz.
+3. Dosyaları yeni bir GitHub deposuna yükle → Vercel'de Deploy. İlk açılışta 97 kart yüklenir.
 
 ## Kartlar
 
-- `NT2 opleiding` sayfasından 81 ifade → grup **5 Eki**
-- `Kitap ve gazete` sayfasından 16 ifade → grup **Gazete · 5 Eki**
-- Hollandaca tanım → kartın açıklaması (önce Hollandaca); eş/zıt anlam ve kaynak (M1–M4, Bijeenkomst 2) → not; örnek cümleler Türkçe çevirileriyle.
-- Temalar (Grupla → Tema): Leerderskenmerken, Leerroutes & inburgering, Taalgericht vakonderwijs, Nieuwkomers & doorstroom, Taalniveaus & beoordeling, Didactiek & lespraktijk, Pedagogiek & welzijn, Opleiding & reflectie, Formele & academische taal, Krant & boek.
+- `NT2 opleiding` sayfasından 81 ifade → grup **5 Eki**; `Kitap ve gazete` sayfasından 16 ifade → grup **Gazete · 5 Eki**.
+- Her kartta: Hollandaca tanım, **3 örnek cümle** (Türkçe çevirili), **kelime yapısı ve köken**, eş/zıt anlam ve kaynak.
+- Hatırla'da cevabı açınca tanım, örnekler ve kelime yapısı açık görünür; Türkçe anlam isteğe bağlı açılır.
 
 ## Yeni kelime eklemek
 
-Ayarlar → **Claude talimatını kopyala** → kelimeleri altına yaz → Claude'a gönder → dönen JSON'u Ayarlar'daki kutuya yapıştır. Talimat artık NT2 bağlamını ve yeni temaları kullanır.
+Ayarlar → **Claude talimatını kopyala** → kelimeleri altına yaz → Claude'a gönder → dönen JSON'u yapıştır. Talimat; tanım, yapı/köken ve 3 örnek ister.
 
 ## Notlar
 
-- Ses (TTS) Kantoor'daki Cloudflare Worker'ı kullanır. Worker belirli adreslere kısıtlıysa yeni Vercel adresini izinlilere ekle; aksi halde tarayıcı sesi devreye girer.
-- Her güncellemede `sw.js` içindeki `CACHE_NAME` (şu an `nt2-woordenschat-v1`) bir artırılmalı.
-- Hukuki alanlar editörde gizlidir; "Hukuki" filtresi kaldırıldı.
+- Her güncellemede `sw.js` içindeki `CACHE_NAME` (şu an `nt2-woordenschat-v2`) bir artırılmalı.
+- Ses Kantoor'daki Cloudflare Worker'ı kullanır; Worker adres kısıtlıysa yeni Vercel adresini ekle.
