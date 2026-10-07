@@ -5142,8 +5142,7 @@ stReveal=function(){
  let h=question.mode!=='meaning'?`<div class="st-lbl">${question.mode==='cloze'?'Boşluğun cevabı':'Doğru kalıp'}</div><div class="st-tr" lang="nl">${esc28(question.answer)}</div>`:'';
  if(c.uitleg)h+=`<div class="uitleg-box" lang="nl">${esc28(c.uitleg)}</div>`;
  h+=`<div class="st-exs">${(c.examples||[]).slice(0,3).map(e=>`<div class="st-ex"><div class="ex-nl" lang="nl">${esc28(e.nl)}</div></div>`).join('')}</div>`;
- if(c.etymology)h+=`<div class="st-yapi"><div class="st-lbl">Kelime yapısı ve köken</div><div class="etym-box">${esc28(c.etymology)}</div></div>`;
- h+=`<details class="st-more" ${nlFirst?'':'open'}><summary>Türkçe anlam ve notlar</summary><div class="st-tr">${esc28(c.turkish)}</div>${(c.examples||[]).slice(0,3).map(e=>`<div class="ex-tr">${esc28(e.tr)}</div>`).join('')}${c.note?`<div class="note-box">${esc28(c.note)}</div>`:''}</details>`;
+ h+=`<details class="st-more" ${nlFirst?'':'open'}><summary>Türkçe anlam ve notlar</summary><div class="st-tr">${esc28(c.turkish)}</div>${(c.examples||[]).slice(0,3).map(e=>`<div class="ex-tr">${esc28(e.tr)}</div>`).join('')}${c.etymology?`<div class="st-yapi"><div class="st-lbl">Kelime yapısı ve köken</div><div class="etym-box">${esc28(c.etymology)}</div></div>`:''}${c.note?`<div class="note-box">${esc28(c.note)}</div>`:''}</details>`;
  const ans=document.getElementById('st-ans');ans.innerHTML=h;ans.style.display='';ans.classList.remove('in');
  ['bilmedim','zor','bildim'].forEach(g=>document.getElementById('st-g-'+g).textContent=st.queue[st.i].again?'alıştırma':g==='bilmedim'?'20 dk + bu tur':fmtMins(studyNext(p,g).mins));
  document.querySelector('[onclick="stGrade(\'bildim\')"]').disabled=st.usedHint;
