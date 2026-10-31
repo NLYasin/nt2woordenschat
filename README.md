@@ -1,13 +1,16 @@
-# NT2 Woordenschat — v2
+# NT2 Woordenschat — v5
 
 Docent NT2 opleiding için Hollandaca kavram kartları (Supabase + Vercel). Kantoor Woordenschat'a dokunulmaz.
 
-## v2 güncellemesi (zaten kurduysan)
+## v5 güncellemesi
 
-1. Şu anki `index.html` dosyanın en başındaki **iki satırı** (SUPABASE_URL ve SUPABASE_KEY) bir yere kopyala.
-2. Bu ZIP'teki dosyaları GitHub deposundaki aynı adlı dosyaların üzerine koy.
-3. Yeni `index.html`'in başındaki `PROJE-ADRESI` / `ANAHTAR` satırlarını kopyaladığın iki satırla değiştir. Commit → Vercel yayınlar.
-4. Uygulamayı aç. Mevcut 97 karta kelime yapısı/köken ve 2 yeni örnek cümle **kendiliğinden** eklenir. İlerleme ve tekrar takvimi değişmez, kartlar çoğalmaz.
+1. ZIP'teki bütün dosyaları GitHub deposundaki aynı adlı dosyaların üzerine koy ve commit et. Supabase adresi ve anahtarı `index.html` içinde hazır.
+2. Uygulamayı aç. **NT2 Docententaal** belgesindeki 168 kart kendiliğinden eklenir (üstte "Docententaal: … cümle ekleniyor" yazar).
+   - 167 sınıf cümlesi (12 bölüm) + ilk ders için örnek açılış konuşması.
+   - Grup **31 Eki**, tema **Docententaal in de klas**, tür **Cümle**.
+   - Not alanında bölüm adı; "even / maar / eens" yumuşatıcıları ve je/jullie hitabı için kısa ipucu.
+   - Belgede iki kez geçen "Neem rustig de tijd." bir kez eklendi.
+3. Ekleme sunucuda bir kez kaydedilir; başka cihazda açınca kartlar çoğalmaz. Mevcut ilerleme değişmez.
 
 SQL'i yeniden çalıştırmana gerek yok.
 
@@ -21,7 +24,7 @@ SQL'i yeniden çalıştırmana gerek yok.
 
 - `NT2 opleiding` sayfasından 81 ifade → grup **5 Eki**; `Kitap ve gazete` sayfasından 16 ifade → grup **Gazete · 5 Eki**.
 - Her kartta: Hollandaca tanım, **3 örnek cümle** (Türkçe çevirili), **kelime yapısı ve köken**, eş/zıt anlam ve kaynak.
-- Hatırla'da cevabı açınca tanım, örnekler ve kelime yapısı açık görünür; Türkçe anlam isteğe bağlı açılır.
+- Hatırla'da cevabı açınca tanım ve örnekler görünür; Türkçe anlam, kelime yapısı/köken ve notlar "Türkçe anlam ve notlar" açılınca görünür.
 
 ## Yeni kelime eklemek
 
@@ -29,5 +32,5 @@ Ayarlar → **Claude talimatını kopyala** → kelimeleri altına yaz → Claud
 
 ## Notlar
 
-- Her güncellemede `sw.js` içindeki `CACHE_NAME` (şu an `nt2-woordenschat-v2`) bir artırılmalı.
+- Her güncellemede `sw.js` içindeki `CACHE_NAME` (şu an `nt2-woordenschat-v5`) bir artırılmalı.
 - Ses Kantoor'daki Cloudflare Worker'ı kullanır; Worker adres kısıtlıysa yeni Vercel adresini ekle.

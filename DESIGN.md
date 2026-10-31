@@ -85,7 +85,7 @@ Bu dosya, NT2 Woordenschat (Docent NT2 opleiding için Hollandaca kavram kartlar
 3. Yeni animasyonun gerekçesi var mı?
 4. Hollandaca metin öğesi `lang="nl"` taşıyor mu?
 5. İki temada, 375 px genişlikte bakıldı mı?
-6. `sw.js` içindeki `CACHE_NAME` artırıldı mı? (`nt2-woordenschat-vN`, şu an v2)
+6. `sw.js` içindeki `CACHE_NAME` artırıldı mı? (`nt2-woordenschat-vN`, şu an v5)
 7. Yazı tipi korunuyor mu? Arayüz **Manrope** (`--font`), başlık ve büyük sayı **Fraunces** (`--font-display`). Fraunces yalnızca 500 ve 700 kalınlıkta yüklenir; başka kalınlık (600 gibi) kullanılmaz.
 8. Fonksiyonu değiştirmeden önce dosyanın sonundaki v29 ve v28 bloklarında aynı adla yeniden atanmış bir sürüm var mı diye bakıldı mı?
 
@@ -153,3 +153,5 @@ Bu dosya, NT2 Woordenschat (Docent NT2 opleiding için Hollandaca kavram kartlar
 - **İlk kurulum:** veritabanı boşsa `SEED_CARDS` bir kez yüklenir; `app_state` → `nt2_seeded` ikinci yüklemeyi engeller. `nt2_enrich_v2` (cihaz başına): mevcut kartlara köken/yapı ve ek örnekleri bir kez ekler (kökeni boş kartlara).
 - **Kart alanları:** `uitleg` = Hollandaca tanım; `etymology` = "Yapı: …" ve "Köken: …" satırları (Hatırla cevabında açık görünür, başlık "Kelime yapısı ve köken"); `note` = eş/zıt anlam ve kaynak; `examples` = 3 örnek (Türkçe çevirili); `legal` kullanılmaz.
 - `V28_CONTENT` boştur; Kantoor kartlarına ait düzeltme eşlemesi taşınmadı.
+- **Kelime yapısı/köken** Hatırla cevabında "Türkçe anlam ve notlar" içinde durur (ipucu/cevapta önceden görünmesin diye).
+- **Ek paketler:** `DOCENTENTAAL_CARDS` (168 cümle, tema `docententaal`, tarih `31/10`). Sunucuda `app_state` → `nt2_import_docententaal_v1` yoksa bir kez eklenir; var olan cümleler atlanır. Yeni bir paket için aynı kalıp: yeni dizi + yeni `nt2_import_<ad>_v1` anahtarı.
