@@ -1,6 +1,13 @@
-# NT2 Woordenschat — v5
+# NT2 Woordenschat — v6
 
 Docent NT2 opleiding için Hollandaca kavram kartları (Supabase + Vercel). Kantoor Woordenschat'a dokunulmaz.
+
+## v6 güncellemesi — ince hız ayarı
+
+- Hız artık **0,50× ile 2,00× arasında 0,05'lik adımlarla** ayarlanır: − / + düğmeleri, kaydırma çubuğu ve hazır değerler (0,80 · 0,90 · 1,00 · 1,05 · 1,10 · 1,25).
+- **Dinleme modu:** kurulum ekranında tam ayar; oynatırken de cümlenin altında − / + ile değiştirilebilir (bir sonraki tekrarda geçerli olur).
+- **Sesli tekrar, kartlar ve Hatırla'daki dinle düğmeleri:** Sesli tekrar ekranının üstündeki ve Ayarlar → Görünüm'deki **Ses hızı**. Varsayılan 0,90× (önceki sabit hız ile aynı).
+- İki hız ayrı tutulur ve cihazda hatırlanır.
 
 ## v5 güncellemesi
 
@@ -32,5 +39,5 @@ Ayarlar → **Claude talimatını kopyala** → kelimeleri altına yaz → Claud
 
 ## Notlar
 
-- Her güncellemede `sw.js` içindeki `CACHE_NAME` (şu an `nt2-woordenschat-v5`) bir artırılmalı.
+- Her güncellemede `sw.js` içindeki `CACHE_NAME` (şu an `nt2-woordenschat-v6`) bir artırılmalı.
 - Ses Kantoor'daki Cloudflare Worker'ı kullanır; Worker adres kısıtlıysa yeni Vercel adresini ekle.

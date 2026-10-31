@@ -1546,6 +1546,23 @@ body { zoom:1 !important; }
 .td35-row[data-st="1"] { border-left-color: color-mix(in srgb, var(--accent) 65%, var(--border)); }
 .etym-box,.note-box{white-space:pre-line}
 .st-yapi{margin:12px 0}.st-yapi .etym-box{font-size:calc(14px * var(--read-scale));line-height:1.55;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text2)}
+/* İnce hız ayarı (NT2 v6) */
+.spd-ctl{display:flex;flex-direction:column;gap:10px;width:100%}
+.spd-main{display:flex;align-items:center;gap:10px}
+.spd-btn{min-width:44px;min-height:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text);font-family:var(--font);font-size:calc(20px * var(--ui-scale));font-weight:700;cursor:pointer;line-height:1}
+.spd-btn:disabled{opacity:.4;cursor:default}
+.spd-val{min-width:76px;text-align:center;font-family:var(--font-display);font-weight:500;font-size:calc(22px * var(--ui-scale));font-variant-numeric:tabular-nums;color:var(--accent)}
+.spd-range{flex:1;min-width:0;accent-color:var(--accent);height:44px}
+.spd-presets{display:flex;gap:6px;flex-wrap:wrap}
+.spd-preset{padding:8px 12px;min-height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text2);font-family:var(--font);font-size:calc(13px * var(--ui-scale));font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums}
+.spd-preset.active{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, transparent)}
+.spd-compact .spd-main{justify-content:center}
+.spd-compact .spd-val{font-size:calc(17px * var(--ui-scale));min-width:64px}
+.spd-compact .spd-btn{font-size:calc(17px * var(--ui-scale))}
+.spd-lbl{font-size:calc(12px * var(--ui-scale));color:var(--text3);text-align:center}
+.spd-inline{margin:4px 0 14px}
+.spd-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin:0 16px 12px}
+.spd-box .spd-title{font-size:calc(12px * var(--ui-scale));font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
 </style>
 </head>
 <body>
@@ -1684,6 +1701,13 @@ body { zoom:1 !important; }
         <div class="settings-row-label">Yazı boyutu</div>
         <div class="settings-row-desc">Metinleri büyüt veya küçült</div>
       </div>
+    </div>
+    <div class="settings-row" style="flex-direction:column; align-items:stretch; gap:8px;">
+      <div>
+        <div class="settings-row-label">Ses hızı</div>
+        <div class="settings-row-desc">Kartlardaki, Hatırla'daki ve Sesli tekrar'daki dinle düğmeleri. Dinleme modunun kendi hızı vardır.</div>
+      </div>
+      <div id="settings-spd"></div>
     </div>
     <div class="fontsize-toggle" id="fontsize-toggle">
       <button class="fs-btn" data-scale="0.875" onclick="setFontScale(0.875)">Küçük</button>
@@ -1844,6 +1868,7 @@ body { zoom:1 !important; }
     <h2><svg class="ic"><use href="#i-microphone"/></svg>Sesli tekrar</h2>
     <span class="tc" id="sesli-count"></span>
   </div>
+  <div class="spd-box" id="sesli-spd"></div>
   <div id="sesli-content"></div>
 </div><!-- end screen-sesli -->
 
@@ -3020,7 +3045,7 @@ function renderListenSetup(el) {
 
       <div class="listen-setup-label">${ic('bolt')}Hız</div>
       <div class="listen-setup-row">
-        ${[0.75,1,1.25,1.5,2].map(s => `<button class="listen-setup-opt ${s===listenSpeed?'active':''}" onclick="setListenSpeed(${s})">${s}×</button>`).join('')}
+        ${speedCtlHtml('listen')}
       </div>
 
       <div class="listen-setup-actions">
@@ -3070,6 +3095,7 @@ function renderListenPlayback(el, progressText) {
     </div>
 
     <div class="listen-playback-meta" id="listen-meta"></div>
+    <div class="spd-inline" id="listen-spd-inline">${speedCtlHtml('listen', true)}</div>
 
     <div class="listen-playlist-label">${ic('message')}Sıradaki cümleler (${listenQueue.length})</div>
     <div class="listen-playlist" id="listen-playlist" data-sig="${sig}">
@@ -3135,7 +3161,7 @@ function listenPatchPlayback() {
   const meta = document.getElementById('listen-meta');
   if (meta) {
     meta.textContent = (listenRepeatCount > 1 ? `Tekrar: ${Math.min(listenRepeatsDone+1, listenRepeatCount)}/${listenRepeatCount}` : '')
-      + (listenSpeed !== 1 ? (listenRepeatCount > 1 ? ' · ' : '') + `Hız ${listenSpeed}×` : '');
+      + (listenSpeed !== 1 ? (listenRepeatCount > 1 ? ' · ' : '') + `Hız ${fmtSpd(listenSpeed)}` : '');
   }
 
   listenQueue.forEach((c, idx) => {
@@ -5969,7 +5995,82 @@ setSyncStatus = function(state, text) {
   return baseSetSyncNT2(state, text);
 };
 
+// ════════════════════════════════════════════════════════════════════════
+// NT2 v6 — İnce hız ayarı (0,50×–2,00×, 0,05 adım)
+// listen: Dinleme modu (kv_listen_speed). voice: diğer bütün "Dinle"
+// düğmeleri — kartlar, Hatırla, Sesli tekrar (kv_voice_speed, varsayılan
+// 0,90× = eski sabit -%10).
+// ════════════════════════════════════════════════════════════════════════
+const SPD_MIN = 0.5, SPD_MAX = 2, SPD_STEP = 0.05;
+const SPD_PRESETS = [0.8, 0.9, 1, 1.05, 1.1, 1.25];
+let voiceSpeed = 0.9;
+try { const v = parseFloat(localStorage.getItem('kv_voice_speed')); if (v >= SPD_MIN && v <= SPD_MAX) voiceSpeed = v; } catch (e) {}
+function clampSpd(v) { v = Math.round(Number(v) * 100) / 100; return Math.min(SPD_MAX, Math.max(SPD_MIN, isNaN(v) ? 1 : v)); }
+function fmtSpd(v) { return clampSpd(v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '×'; }
+function getSpd(kind) { return kind === 'listen' ? listenSpeed : voiceSpeed; }
+function speedCtlHtml(kind, compact) {
+  const v = clampSpd(getSpd(kind));
+  const presets = compact ? '' : `<div class="spd-presets">${SPD_PRESETS.map(p => `<button type="button" class="spd-preset ${Math.abs(p - v) < 0.001 ? 'active' : ''}" onclick="setSpd('${kind}',${p})">${fmtSpd(p)}</button>`).join('')}</div>`;
+  const range = compact ? '' : `<input class="spd-range" type="range" min="${SPD_MIN}" max="${SPD_MAX}" step="${SPD_STEP}" value="${v}" aria-label="Hız" oninput="setSpd('${kind}',this.value,true)" onchange="setSpd('${kind}',this.value)">`;
+  return `<div class="spd-ctl ${compact ? 'spd-compact' : ''}" data-spd="${kind}">
+    <div class="spd-main">
+      <button type="button" class="spd-btn" aria-label="Yavaşlat" onclick="stepSpd('${kind}',-1)" ${v <= SPD_MIN ? 'disabled' : ''}>−</button>
+      ${compact ? '' : range}
+      <span class="spd-val" aria-live="polite">${fmtSpd(v)}</span>
+      <button type="button" class="spd-btn" aria-label="Hızlandır" onclick="stepSpd('${kind}',1)" ${v >= SPD_MAX ? 'disabled' : ''}>+</button>
+    </div>
+    ${compact ? '<div class="spd-lbl">Hız · sonraki tekrarda geçerli</div>' : presets}
+  </div>`;
+}
+function refreshSpdCtls(kind, live) {
+  document.querySelectorAll(`.spd-ctl[data-spd="${kind}"]`).forEach(el => {
+    const v = clampSpd(getSpd(kind));
+    const val = el.querySelector('.spd-val'); if (val) val.textContent = fmtSpd(v);
+    if (live) return;   // kaydırırken çubuğu yeniden çizme
+    el.outerHTML = speedCtlHtml(kind, el.classList.contains('spd-compact'));
+  });
+}
+function setSpd(kind, v, live) {
+  v = clampSpd(v);
+  if (kind === 'listen') { listenSpeed = v; saveListenPrefs(); }
+  else { voiceSpeed = v; try { localStorage.setItem('kv_voice_speed', String(v)); } catch (e) {} }
+  refreshSpdCtls(kind, live);
+  if (kind === 'listen' && !live) { const meta = document.getElementById('listen-meta'); if (meta && typeof listenPatchPlayback === 'function') { try { listenPatchPlayback(); } catch (e) {} } }
+}
+function stepSpd(kind, dir) { setSpd(kind, clampSpd(getSpd(kind)) + dir * SPD_STEP); }
+setListenSpeed = function(v) { setSpd('listen', v); };
+// Eski kayıtlı hız 0,75/1,25 gibi değerler aynen geçerli; aralık dışını düzelt
+listenSpeed = clampSpd(listenSpeed);
+function renderSpdBoxes() {
+  const ses = document.getElementById('sesli-spd');
+  if (ses) ses.innerHTML = `<div class="spd-title">Ses hızı</div>${speedCtlHtml('voice')}`;
+  const st = document.getElementById('settings-spd');
+  if (st) st.innerHTML = speedCtlHtml('voice');
+}
+// Dinle düğmeleri: Edge TTS ve Web Speech yedeği ayarlanan hızla
+speakDutch = function(e, text) {
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  if (isSpeaking) {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    document.querySelectorAll('.btn-speak.speaking').forEach(b => b.classList.remove('speaking'));
+    if (btn && btn.dataset && btn.dataset.text === text) return;
+  }
+  if (btn && btn.classList) { btn.classList.add('speaking'); btn.dataset.text = text; }
+  isSpeaking = true;
+  const done = () => { isSpeaking = false; if (btn && btn.classList) btn.classList.remove('speaking'); currentAudio = null; };
+  const v = clampSpd(voiceSpeed);
+  fetchEdgeTTSBlobUrl(text, speedToRatePct(v))
+    .then(url => playBlobUrl(url))
+    .catch(() => speakWebSpeech(text, v))
+    .then(done)
+    .catch(done);
+};
+
 initV29();
+renderSpdBoxes();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
