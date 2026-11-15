@@ -1563,6 +1563,9 @@ body { zoom:1 !important; }
 .spd-inline{margin:4px 0 14px}
 .spd-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin:0 16px 12px}
 .spd-box .spd-title{font-size:calc(12px * var(--ui-scale));font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.category-section { margin:16px 0 24px; }
+.category-heading { font-size:17px; font-weight:800; color:var(--text); margin:0 0 12px; padding:10px 2px; border-bottom:2px solid var(--accent); }
+.category-heading span { font-size:12px; font-weight:500; color:var(--text3); margin-left:8px; }
 </style>
 </head>
 <body>
@@ -1794,7 +1797,7 @@ body { zoom:1 !important; }
         <div class="settings-row-desc">1) Talimatı kopyala ve Claude'a gönder, altına kelimelerini yaz. 2) Verdiği JSON'u aşağıya yapıştırıp yükle. Talimat tema ve kalıp kurallarını içerir.</div>
       </div>
       <button class="btn-settings full" onclick="copyClaudeTemplate(this)"><svg class="ic"><use href="#i-message"/></svg>Claude talimatını kopyala</button>
-      <textarea id="new-cards-input" placeholder='[{"date":"29/09", "type":"woord", "dutch":"...", "turkish":"...", "uitleg":"...", "note":"...", "examples":[...], "legal":null, "is_legal":false, "tema":"gesprek"}]' style="width:100%; min-height:120px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text); font-family:var(--mono); font-size:calc(12px * var(--ui-scale)); resize:vertical;"></textarea>
+      <textarea id="new-cards-input" placeholder='[{"date":"29/09", "type":"woord", "dutch":"...", "turkish":"...", "uitleg":"...", "note":"...", "examples":[...], "legal":null, "is_legal":false, "tema":"opleiding"}]' style="width:100%; min-height:120px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text); font-family:var(--mono); font-size:calc(12px * var(--ui-scale)); resize:vertical;"></textarea>
       <button class="btn-settings primary full" onclick="addNewCards()"><svg class="ic"><use href="#i-plus"/></svg>Kartları Ekle</button>
     </div>
     <div class="settings-status" id="newcards-status"></div>
@@ -1932,7 +1935,7 @@ body { zoom:1 !important; }
     <label>Türkçe anlamı<input id="ed-turkish" maxlength="2000"></label>
     <label>Kısa Hollandaca açıklama<textarea id="ed-uitleg" lang="nl" maxlength="2500" placeholder="Eenvoudige uitleg in het Nederlands"></textarea></label>
     <div class="editor-grid"><label>Kart türü<select id="ed-type"><option value="woord">Kelime / kalıp</option><option value="zin">Cümle</option><option value="uitdrukking">Deyim</option></select></label><label>Tema<select id="ed-tema"></select></label></div>
-    <label>Tarih / kaynak<input id="ed-date" placeholder="05/10 veya GAZETE 05/10" maxlength="80"></label>
+    <label>Tarih / kaynak<input id="ed-date" placeholder="14/11" maxlength="80"></label>
     <label class="check-label"><input type="checkbox" id="ed-check">İfade kontrol bekliyor; henüz çalışmaya alınmasın</label>
     <details><summary>Örnek cümleler</summary><div id="editor-examples"></div></details>
     <details><summary>Ek notlar</summary><div class="editor-advanced">
@@ -3490,18 +3493,17 @@ async function addExampleAsCard(e, itemId, i) {
 // → ilk 183 kart için hazır eşleme (SEED_TEMA) → anahtar kelime tahmini.
 // ════════════════════════════════════════════════════════════════════════
 const TEMAS = [
-  { id:'leerder',       label:'Leerderskenmerken',          tr:'Öğrenci özellikleri (M1)' },
-  { id:'leerroutes',    label:'Leerroutes & inburgering',   tr:'Öğrenme yolları, redzaamheid, intake (M2)' },
-  { id:'taalgericht',   label:'Taalgericht vakonderwijs',   tr:'Dil odaklı ders öğretimi (M3)' },
-  { id:'nieuwkomers',   label:'Nieuwkomers & doorstroom',   tr:'Yeni gelen öğrenciler, geçiş (M4)' },
-  { id:'niveaus',       label:'Taalniveaus & beoordeling',  tr:'Dil düzeyleri, değerlendirme, sınavlar' },
-  { id:'didactiek',     label:'Didactiek & lespraktijk',    tr:'Ders hazırlığı, yöntem, sınıf içi' },
-  { id:'pedagogiek',    label:'Pedagogiek & welzijn',       tr:'Öğrenciye yaklaşım, empati, iyi oluş' },
-  { id:'professioneel', label:'Opleiding & reflectie',      tr:'Logboek, staj, yansıtma, mesleki tutum' },
-  { id:'taal',          label:'Formele & academische taal', tr:'Resmi/akademik bağlaçlar ve genel kelimeler' },
-  { id:'docententaal',  label:'Docententaal in de klas',    tr:'Sınıfta öğretmen dili: yönerge, soru, geri bildirim' },
-  { id:'lezen',         label:'Krant & boek',               tr:'Gazete ve kitaptan kelimeler' }
+  {id:'opleiding',label:'NT2 opleiding',tr:'NT2 öğretmenlik eğitimi'},
+  {id:'c1',label:'C1 Cursus',tr:'C1 dil kursu'},
+  {id:'klassenmanagement',label:'Klassenmanagement',tr:'Sınıf yönetimi'}
 ];
+// Eski sürümdeki alt temaları yeni üç kategoride kayıpsız göster.
+const OLD_TEMA_MAP = {
+  leerder:'opleiding',leerroutes:'opleiding',taalgericht:'opleiding',nieuwkomers:'opleiding',
+  niveaus:'opleiding',didactiek:'opleiding',pedagogiek:'opleiding',professioneel:'opleiding',
+  taal:'opleiding',docententaal:'klassenmanagement',lezen:'c1'
+};
+function normalizeTemaId(id) { return OLD_TEMA_MAP[id] || id; }
 const TEMA_BY_ID = Object.fromEntries(TEMAS.map(t => [t.id, t]));
 const SEED_TEMA = {"de beginsituatie": "leerder", "het competentieprofiel": "professioneel", "het logboek": "professioneel", "het leerdoel": "didactiek", "differentiëren": "didactiek", "de taalsteun": "taalgericht", "de formatieve evaluatie": "didactiek", "ik merk dat …; daarom pas ik … aan.": "professioneel", "wezenlijk": "taal", "ontbreken (ontbrak)": "niveaus", "oog hebben voor": "pedagogiek", "het inlevingsvermogen": "pedagogiek", "de verliesverwerking": "pedagogiek", "benutten in de les": "didactiek", "hanteren": "didactiek", "op adequate wijze": "professioneel", "op verantwoorde wijze": "professioneel", "de wijze waarop": "taal", "ten aanzien van": "taal", "met betrekking tot": "taal", "precair": "pedagogiek", "voorafgaand aan": "taal", "de belanghebbenden": "professioneel", "zich voordoen": "didactiek", "de noodzakelijke deelvaardigheden": "didactiek", "eenduidig": "niveaus", "interpreteerbaar (interpreteerbare)": "niveaus", "de vooropleiding": "leerder", "de doelsituatie": "leerder", "het taalcontact": "leerder", "de faalangst": "leerder", "verwerven": "leerder", "het taalaanbod": "leerder", "herformuleren": "leerder", "de differentiatie": "leerder", "het maatwerk": "leerroutes", "de dualiteit": "leerroutes", "de integraliteit": "leerroutes", "de zelfredzaamheid": "leerroutes", "de participatie": "leerroutes", "het taalschakeltraject": "leerroutes", "de alfabetisering": "leerroutes", "de leerroute": "leerroutes", "de brede intake": "leerroutes", "de lat hoog leggen": "taalgericht", "de vakinhoud": "taalgericht", "de voorkennis": "taalgericht", "verwoorden": "taalgericht", "het schrijfkader": "taalgericht", "het struikelblok": "taalgericht", "het houvast": "taalgericht", "de geletterdheid": "nieuwkomers", "de gecijferdheid": "nieuwkomers", "de leerlijn": "nieuwkomers", "het uitstroomprofiel": "nieuwkomers", "de doorstroom": "nieuwkomers", "de nazorg": "nieuwkomers", "bijstellen": "nieuwkomers", "de thuistaal": "nieuwkomers", "de schooltaal": "nieuwkomers", "het functionele taaldoel": "niveaus", "de taalvaardigheid": "niveaus", "het referentiekader": "niveaus", "de descriptor": "niveaus", "de schaal": "niveaus", "inschalen": "niveaus", "onderbouwen": "niveaus", "de zelfbeoordeling": "niveaus", "de beheersing": "niveaus", "de samenhang": "niveaus", "de vloeiendheid": "niveaus", "de zelfstandigheid": "niveaus", "de normering": "niveaus", "het schrijfproduct": "niveaus", "het spreekproduct": "niveaus", "de voortgangstoets": "niveaus", "de basisleergang": "niveaus", "de context": "didactiek", "de interactie": "didactiek", "de meertaligheid": "didactiek", "afleiden": "didactiek", "desondanks": "lezen", "hoewel": "lezen", "de aanleiding": "lezen", "in aanmerking komen voor": "lezen", "uit … blijkt dat …": "lezen", "ten opzichte van": "lezen", "op grond van": "lezen", "vooralsnog": "lezen", "daarentegen": "lezen", "gendergerelateerd geweld": "lezen", "we eisen de nacht op.": "lezen", "er is iets grondig mis": "lezen", "grensoverschrijdend gedrag": "lezen", "meetbaar succes": "lezen", "ze beaamt dit…": "lezen", "onderliggende patronen": "lezen", "oké, allemaal!": "docententaal", "mag ik even jullie aandacht?": "docententaal", "luister allemaal even.": "docententaal", "kijk even deze kant op.": "docententaal", "kijk allemaal naar het bord.": "docententaal", "zijn jullie er klaar voor?": "docententaal", "even stil, alsjeblieft.": "docententaal", "kunnen we weer beginnen?": "docententaal", "ik wil even iets uitleggen.": "docententaal", "iedereen weer bij de les?": "docententaal", "leg je pen even neer.": "docententaal", "ogen deze kant op, alsjeblieft.": "docententaal", "goedemorgen allemaal!": "docententaal", "welkom in de les!": "docententaal", "ik ben jullie nieuwe docent.": "docententaal", "ik zal me eerst even voorstellen.": "docententaal", "vandaag gaan we elkaar leren kennen.": "docententaal", "laten we een voorstelrondje doen.": "docententaal", "hoe wil je graag aangesproken worden?": "docententaal", "wie wil er beginnen?": "docententaal", "vertel eens iets over jezelf.": "docententaal", "wat wil je graag leren?": "docententaal", "we maken samen een paar afspraken.": "docententaal", "fouten maken mag!": "docententaal", "we helpen elkaar.": "docententaal", "iedereen krijgt de tijd om te praten.": "docententaal", "zullen we beginnen?": "docententaal", "we gaan aan de slag.": "docententaal", "vandaag gaan we het hebben over…": "docententaal", "eerst herhalen we de vorige les.": "docententaal", "wat hebben we vorige keer geleerd?": "docententaal", "wie weet het nog?": "docententaal", "ik geef eerst een voorbeeld.": "docententaal", "let hier even op.": "docententaal", "is het tot nu toe duidelijk?": "docententaal", "we gaan nu verder met…": "docententaal", "we slaan deze opdracht even over.": "docententaal", "daar komen we straks op terug.": "docententaal", "laten we eerst samen oefenen.": "docententaal", "nu gaan jullie het zelf proberen.": "docententaal", "pak je boek erbij.": "docententaal", "pak allemaal jullie boeken erbij.": "docententaal", "sla je boek open op pagina 25.": "docententaal", "kijk naar opdracht drie.": "docententaal", "lees eerst de instructie.": "docententaal", "lees de tekst voor jezelf.": "docententaal", "lees de tekst hardop.": "docententaal", "onderstreep de belangrijke woorden.": "docententaal", "omcirkel het goede antwoord.": "docententaal", "vul de ontbrekende woorden in.": "docententaal", "schrijf je antwoord op.": "docententaal", "luister naar het fragment.": "docententaal", "luister nog een keer.": "docententaal", "zet de zinnen in de goede volgorde.": "docententaal", "maak de zin af.": "docententaal", "controleer je antwoorden.": "docententaal", "leg je boek maar even weg.": "docententaal", "heeft iemand een vraag?": "docententaal", "zijn er nog vragen?": "docententaal", "is alles duidelijk?": "docententaal", "begrijpen jullie wat ik bedoel?": "docententaal", "wie kan antwoord geven?": "docententaal", "wie wil het proberen?": "docententaal", "wat denk jij?": "docententaal", "kan iemand een voorbeeld geven?": "docententaal", "kun je dat uitleggen?": "docententaal", "kun je dat nog een keer zeggen?": "docententaal", "waarom denk je dat?": "docententaal", "wie denkt er anders over?": "docententaal", "kun je het in je eigen woorden zeggen?": "docententaal", "wat betekent dit woord?": "docententaal", "welke woorden zijn nieuw voor jullie?": "docententaal", "zal ik het nog een keer uitleggen?": "docententaal", "vertel maar!": "docententaal", "neem rustig de tijd.": "docententaal", "probeer een hele zin te maken.": "docententaal", "kun je wat harder praten?": "docententaal", "praat rustig en duidelijk.": "docententaal", "stel een vraag aan je buurvrouw of buurman.": "docententaal", "geef een antwoord in het nederlands.": "docententaal", "kun je nog iets toevoegen?": "docententaal", "wie wil daarop reageren?": "docententaal", "probeer het zonder je boek.": "docententaal", "we oefenen de uitspraak samen.": "docententaal", "zeg het maar na.": "docententaal", "welke klank hoor je?": "docententaal", "we komen weer bij elkaar.": "docententaal", "we gaan weer klassikaal verder.": "docententaal", "rond je gesprek maar af.": "docententaal", "stop maar even met schrijven.": "docententaal", "luister even naar elkaar.": "docententaal", "eén voor één, alsjeblieft.": "docententaal", "laat elkaar uitpraten.": "docententaal", "steek je hand op als je iets wilt zeggen.": "docententaal", "wacht even, ik kom zo bij je.": "docententaal", "we houden het even rustig.": "docententaal", "laten we bij de opdracht blijven.": "docententaal", "we luisteren zonder elkaar te onderbreken.": "docententaal", "we gaan nu weer verder met de les.": "docententaal", "goed gedaan!": "docententaal", "heel goed geprobeerd!": "docententaal", "bijna goed!": "docententaal", "dat is een goed begin.": "docententaal", "probeer het nog eens.": "docententaal", "denk nog even na.": "docententaal", "kijk nog eens goed.": "docententaal", "let op de woordvolgorde.": "docententaal", "let op de uitspraak.": "docententaal", "let op het werkwoord.": "docententaal", "je bent op de goede weg.": "docententaal", "geeft niet, probeer het maar.": "docententaal", "wie kan helpen?": "docententaal", "dat is een veelgemaakte fout.": "docententaal", "we leren van onze fouten.": "docententaal", "dat klopt helemaal.": "docententaal", "je hebt goed opgelet.": "docententaal", "mooi uitgelegd!": "docententaal", "we gaan in tweetallen werken.": "docententaal", "werk samen met je buurman of buurvrouw.": "docententaal", "maak groepjes van drie.": "docententaal", "bespreek de vragen samen.": "docententaal", "stel elkaar vragen.": "docententaal", "wissel nu van rol.": "docententaal", "nu is de ander aan de beurt.": "docententaal", "help elkaar, maar geef niet meteen het antwoord.": "docententaal", "iedereen moet aan het woord komen.": "docententaal", "kies samen één antwoord.": "docententaal", "vertel straks wat jullie hebben besproken.": "docententaal", "we bespreken het zo samen.": "docententaal", "je krijgt vijf minuten de tijd.": "docententaal", "we hebben nog tien minuten.": "docententaal", "nog één minuut!": "docententaal", "zijn jullie bijna klaar?": "docententaal", "wie is er al klaar?": "docententaal", "we wachten nog heel even.": "docententaal", "we gaan afronden.": "docententaal", "deze opdracht doen we morgen verder.": "docententaal", "we lopen een beetje uit.": "docententaal", "we gaan iets sneller verder.": "docententaal", "we gaan even pauze houden.": "docententaal", "we nemen tien minuten pauze.": "docententaal", "we beginnen om half elf weer.": "docententaal", "de pauze is voorbij.": "docententaal", "kom maar weer zitten.": "docententaal", "we zijn bijna klaar voor vandaag.": "docententaal", "wat hebben we vandaag geleerd?": "docententaal", "dit is het huiswerk voor de volgende les.": "docententaal", "schrijf het huiswerk even op.": "docententaal", "heeft iedereen het huiswerk opgeschreven?": "docententaal", "zijn er nog vragen over het huiswerk?": "docententaal", "bedankt voor jullie inzet!": "docententaal", "tot de volgende les!": "docententaal", "fijne dag nog!": "docententaal", "kijk eens!": "docententaal", "luister maar even.": "docententaal", "probeer maar!": "docententaal", "vertel eens!": "docententaal", "ga maar zitten.": "docententaal", "pak je boek er maar bij.": "docententaal", "even kijken…": "docententaal", "nou, wie weet het?": "docententaal", "zo, we gaan verder!": "docententaal", "dat gaan we zo zien.": "docententaal", "prima, dank je wel.": "docententaal", "precies!": "docententaal", "inderdaad!": "docententaal", "goed, dan gaan we door.": "docententaal", "goedemorgen allemaal! welkom in de les. ik ben jullie nieuwe docent. vandaag gaan we eerst kennismaken. daarna gaan we samen aan de slag. we gaan veel nederlands praten en oefenen. fouten maken is helemaal niet erg. daar leren we juist van! als je iets niet begrijpt, mag je altijd een vraag stellen. oké, zijn jullie er klaar voor? dan gaan we beginnen!": "docententaal"};
 const TEMA_RULES = [
@@ -3517,24 +3519,24 @@ const TEMA_RULES = [
 let TEMA_MAP = {};            // {card_id: tema_id}
 // Sunucudan gelen harita yerelde henüz gönderilmemiş seçimleri ezmesin
 function TEMA_MAP_PENDING() { try { return JSON.parse(localStorage.getItem('kv_tema_map') || '{}'); } catch(e) { return {}; } }
-let groupMode = 'date';       // 'date' | 'tema'
+let groupMode = 'tema';       // ana kategori ve altında tarih
 let currentTema = 'all';
 
 function loadTemaLocal() {
   try { TEMA_MAP = JSON.parse(localStorage.getItem('kv_tema_map') || '{}'); } catch(e) { TEMA_MAP = {}; }
-  try { groupMode = localStorage.getItem('kv_group_mode') || 'date'; } catch(e) {}
+  groupMode = 'tema';
 }
 function autoTema(item) {
+  const date = String(item.date || '');
+  if (/^GAZETE/i.test(date)) return 'c1';
   const seed = SEED_TEMA[String(item.dutch || '').trim().toLowerCase()];
-  if (seed) return seed;
-  const hay = [item.dutch, item.turkish, item.uitleg].filter(Boolean).join(' ');
-  if (/^GAZETE/i.test(item.date || '')) return 'lezen';
-  for (const [id, re] of TEMA_RULES) if (re.test(hay)) return id;
-  return 'taal';
+  if (seed) return normalizeTemaId(seed);
+  if (/^STAJ/i.test(date)) return 'opleiding';
+  return 'opleiding';
 }
 function getTema(item) {
-  const t = TEMA_MAP[item.id];
-  return (t && TEMA_BY_ID[t]) ? t : autoTema(item);
+  const t = normalizeTemaId(TEMA_MAP[item.id]);
+  return TEMA_BY_ID[t] ? t : autoTema(item);
 }
 async function pushTemaMap() {
   try { localStorage.setItem('kv_tema_map', JSON.stringify(TEMA_MAP)); } catch(e) {}
@@ -4079,7 +4081,7 @@ async function addNewCards() {
     // JSON'daki "tema" alanını kaydet (veritabanında sütun gerekmez, app_state'te tutulur)
     if (Array.isArray(inserted)) {
       let changed = false;
-      inserted.forEach((row, i) => { const t = newCards[i] && newCards[i].tema; if (row && row.id && t && TEMA_BY_ID[t]) { TEMA_MAP[row.id] = t; changed = true; } });
+      inserted.forEach((row, i) => { const t = newCards[i] && newCards[i].tema; if (row && row.id && t && TEMA_BY_ID[normalizeTemaId(t)]) { TEMA_MAP[row.id] = normalizeTemaId(t); changed = true; } });
       if (changed) pushTemaMap();
     }
     statusEl.className = 'settings-status show ok';
@@ -5672,7 +5674,7 @@ async function importCorrections31(event) {
         if (JSON.stringify(cur ?? null) !== JSON.stringify(fix[k] ?? null)) changed[k] = fix[k];
       }
       if (changed.type && !['woord', 'zin', 'uitdrukking'].includes(changed.type)) delete changed.type;
-      const temaChange = fix.tema && TEMA_BY_ID[fix.tema] && getTema(c) !== fix.tema;
+      const temaChange = fix.tema && TEMA_BY_ID[normalizeTemaId(fix.tema)] && getTema(c) !== normalizeTemaId(fix.tema);
       // v32: "persist" = ekranda zaten görünen (v28'in yalnızca ekranda uyguladığı)
       // değerleri de veritabanına kalıcı yaz.
       const force = !!(fix.persist || data.persistAll);
@@ -5699,7 +5701,7 @@ async function importCorrections31(event) {
         state28('cardmeta:' + c.id, { ...m, raw: raw && norm28(raw) !== norm28(merged.dutch) ? raw : null, needsReview: nr, custom: true });
         CARDS = CARDS.map(x => x.id === c.id ? { ...x, ...payload, isLegal: payload.is_legal, _raw: raw && norm28(raw) !== norm28(merged.dutch) ? raw : null, _needsReview: nr } : x);
       }
-      if (tema) { TEMA_MAP[c.id] = tema; temaChanged = true; }
+      if (tema) { TEMA_MAP[c.id] = normalizeTemaId(tema); temaChanged = true; }
     }
     if (temaChanged) pushTemaMap();
     cacheCards(); renderAll(); updateStats();
@@ -6068,6 +6070,120 @@ speakDutch = function(e, text) {
     .then(done)
     .catch(done);
 };
+
+// v7 — üç ana kategori, her birinin içinde kronolojik tarih grupları.
+// Her grup anahtarında kategori de vardır: iki kategorinin aynı günkü kartları karışmaz.
+groupMode = 'tema';
+buildGroupToggle = function() {
+  const el = document.getElementById('group-toggle');
+  if (el) el.innerHTML = '<span class="gt-label">Kategoriler · tarihe göre</span>';
+};
+setGroupMode = function() { groupMode = 'tema'; buildDateFilters(); renderAll(); };
+buildDateFilters = function() {
+  const el = document.getElementById('date-filters'); if (!el) return;
+  const selected = currentTema;
+  el.innerHTML = `<label class="gt-label" for="collection-scope">Kategori</label><select id="collection-scope"><option value="all">Tüm kategoriler</option>${TEMAS.map(t=>`<option value="${t.id}">${t.label}</option>`).join('')}</select>`;
+  const sel=el.querySelector('select'); sel.value = selected;
+  sel.onchange=()=>{currentTema=sel.value; renderAll();};
+};
+renderAll = function() {
+  const el=document.getElementById('content'); if (!el) return;
+  groupMode='tema';
+  const pool=getFiltered();
+  const blocks=TEMAS.filter(t=>currentTema==='all'||currentTema===t.id).map(t=>{
+    const items=pool.filter(c=>getTema(c)===t.id);
+    if (!items.length) return '';
+    const dates=sortDates([...new Set(items.map(c=>c.date))]);
+    const panels=dates.map((date,i)=>{
+      const key=t.id+'|'+date;
+      const on=!!searchQuery.trim()||openGroups.has(key)||(!Object.prototype.hasOwnProperty.call(groups28,'categories')&&i===0);
+      const cards=items.filter(c=>c.date===date);
+      const learned=cards.filter(c=>PROGRESS[c.id]?.is_known).length;
+      return `<section class="date-group ${on?'open':''}" data-date="${esc28(key)}"><button class="date-label" data-group="${esc28(key)}" aria-expanded="${on}"><span>${esc28(formatDateLabel(date))}</span><span class="dl-progress">${learned}/${cards.length}</span><span class="dl-meta">${cards.length} kart</span><span class="dl-arrow">›</span></button><div class="date-cards">${cards.map(renderCard).join('')}</div></section>`;
+    }).join('');
+    return `<section class="category-section"><h3 class="category-heading">${esc28(t.label)} <span>${items.length} kart</span></h3>${panels}</section>`;
+  }).join('');
+  el.innerHTML=blocks||'<div class="empty">Bu aramada kart bulunamadı.</div>';
+  el.querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>toggleGroup(b.dataset.group));
+  restoreOpenCardBodies();
+};
+toggleGroup = function(key) {
+  if(openGroups.has(key)) openGroups.delete(key); else openGroups.add(key);
+  groups28.categories=[...openGroups];v28Store('kv_v28_groups',groups28);
+  document.querySelectorAll('.date-group').forEach(g=>{
+    if(g.dataset.date===key){g.classList.toggle('open',openGroups.has(key));g.querySelector('.date-label').setAttribute('aria-expanded',String(openGroups.has(key)));}
+  });
+};
+// iOS Safari: audio.play() otomatik bir sonraki cümlede sessizce bekleyebiliyor.
+// Tek bir ses öğesini tekrar kullan, sonlanmayan olaylara zaman aşımı koy,
+// iptal edilen sesleri temizle ve yanlış sesin sonraki cümleyi durdurmasını engelle.
+let listenAudioElement = null;
+let listenAudioCleanup = null;
+function stopListenAudio() {
+  if (listenAudioCleanup) { listenAudioCleanup(); listenAudioCleanup=null; }
+  if (listenAudioElement) {
+    try { listenAudioElement.pause(); listenAudioElement.removeAttribute('src'); listenAudioElement.load(); } catch(e) {}
+  }
+  currentAudio=null;
+}
+playBlobUrl = function(url) {
+  return new Promise((resolve,reject)=>{
+    const audio=listenAudioElement||(listenAudioElement=new Audio());
+    audio.preload='auto';
+    // Önceki olay/URL kesin kapatılmalı.
+    if(listenAudioCleanup) listenAudioCleanup();
+    let ended=false;
+    let timeout;
+    const cleanup=()=>{
+      clearTimeout(timeout);
+      audio.removeEventListener('ended',onEnd);
+      audio.removeEventListener('error',onError);
+      audio.removeEventListener('stalled',onStall);
+      URL.revokeObjectURL(url);
+      if(listenAudioCleanup===cleanup) listenAudioCleanup=null;
+    };
+    const finish=(err)=>{
+      if(ended)return;
+      ended=true; cleanup();
+      if(err)reject(err);else resolve();
+    };
+    const onEnd=()=>finish();
+    const onError=()=>finish(new Error('Audio playback error'));
+    // 'stalled' kısa ağ kesintisi olabilir; watchdog'un karar vermesini bekle.
+    const onStall=()=>{};
+    audio.addEventListener('ended',onEnd);
+    audio.addEventListener('error',onError);
+    audio.addEventListener('stalled',onStall);
+    listenAudioCleanup=()=>finish(new Error('Playback interrupted'));
+    currentAudio=audio;
+    try { audio.pause(); audio.src=url; audio.currentTime=0; }
+    catch(e){finish(e);return;}
+    // Cümle uzunluğuna göre makul üst süre; iOS ended olayı kaçarsa ilerle.
+    timeout=setTimeout(()=>finish(new Error('Audio playback timeout')),45000);
+    try {const task=audio.play(); if(task&&typeof task.catch==='function')task.catch(finish);}catch(e){finish(e);}
+  });
+};
+// WebSpeech yedek mekanizmasında da iOS onend zaman zaman gelmiyor.
+speakWebSpeech = function(text,rate) {
+  return new Promise((resolve,reject)=>{
+    if(!window.speechSynthesis){reject(new Error('Speech unavailable'));return;}
+    const utter=new SpeechSynthesisUtterance(text);
+    utter.lang='nl-NL';utter.rate=rate||0.85;if(nlVoice)utter.voice=nlVoice;
+    let finished=false;
+    const finish=(err)=>{if(finished)return;finished=true;clearTimeout(timer);utter.onend=null;utter.onerror=null;err?reject(err):resolve();};
+    const timer=setTimeout(()=>{try{speechSynthesis.cancel();}catch(e){}finish(new Error('Speech timeout'));},Math.max(9000,Math.min(60000,text.length*260)));
+    utter.onend=()=>finish();utter.onerror=()=>finish(new Error('Speech error'));
+    try{speechSynthesis.cancel();speechSynthesis.speak(utter);}catch(e){finish(e);}
+  });
+};
+const baseListenPauseV7=listenPause;
+listenPause=function(){stopListenAudio();baseListenPauseV7();};
+const baseListenNextManualV7=listenNextManual;
+listenNextManual=function(){stopListenAudio();baseListenNextManualV7();};
+const baseListenPrevV7=listenPrev;
+listenPrev=function(){stopListenAudio();baseListenPrevV7();};
+const baseListenJumpV7=listenJumpTo;
+listenJumpTo=function(i){stopListenAudio();baseListenJumpV7(i);};
 
 initV29();
 renderSpdBoxes();
